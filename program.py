@@ -32,3 +32,33 @@ valid_images = extract_from_path(valid_path)
 print(f"The length of train_images is {len(train_images)}")
 print(f"The length of test_images is {len(test_images)}")
 print(f"The length of valid_images is {len(valid_images)}")
+
+
+def createDataFrame(image_paths):
+    labels = [0 if 'notsmoking' in os.path.basename(path) else 1 for path in image_paths]
+    names = ['notsmoking' if 'notsmoking' in os.path.basename(path) else 'smoking' for path in image_paths]
+    df = pd.DataFrame({'path': image_paths, 'label': names,'label_id': labels})
+    return df
+
+
+
+train_images_df = createDataFrame(train_images)
+test_images_df = createDataFrame(test_images)
+valid_images_df = createDataFrame(valid_images)
+
+def plotCount(df):
+    name = os.path.split(df["path"][0])[0].split("/")[-1]  # Poprawiona linia
+    smoking = df[df['label_id'] == 1]
+    print(f"Total images in {name} is {len(df)}")
+    print(f"Total smoking images is {len(smoking)}")
+    print(f"Total non-smoking images is {len(df)-len(smoking)}")
+    sns.set_style("whitegrid")
+    sns.countplot(x='label_id', data=df)
+    plt.title(f"Count of smoking vs non-smoking images in {name}")  # Dodanie tytułu wykresu
+    plt.xlabel("Label ID")
+    plt.ylabel("Count")
+    plt.show()  # Wyświetlenie wykresu
+
+plotCount(train_images_df)
+plotCount(test_images_df)
+plotCount(valid_images_df)
