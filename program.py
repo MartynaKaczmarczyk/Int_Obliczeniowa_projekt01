@@ -150,3 +150,71 @@ def plot_history(model_history):
 base_eff0 = create_b0_base()
 base_eff0_history = base_eff0.fit(train_data, epochs=1, validation_data=valid_data)
 plot_history(base_eff0_history)
+
+def augmentation(image, label):
+    img = tf.image.random_flip_left_right(image, seed=SEED)
+    img = tf.image.random_brightness(img, 0.1, seed=SEED)
+    img = tf.image.random_contrast(img, 0.2, 0.5, seed=SEED)
+    img = tf.image.random_saturation(img, .5, 1, seed=SEED)
+    img = tf.image.random_hue(img, 0.2, seed=SEED)
+    return img, label
+
+def loadDatasetWithAugmentation(df: pd.DataFrame):
+    dataset = tf.data.Dataset.from_tensor_slices((df['path'], df['label_id']))
+    return (dataset
+            .map(imgPreProcessing)
+            .map(augmentation)
+            .shuffle(BATCH_SIZE * 20)
+            .batch(BATCH_SIZE)
+            )
+
+data_size = len(train_images_df)
+train_data_aug_20 = loadDatasetWithAugmentation(train_images_df.sample(frac=1)[:int(0.25 * data_size)])
+plotRandom(train_data_aug_20)
+
+
+# create a checkpoint callback to save the model
+checkpoint_path = "25_percent_augmented/checkpoint.weights.h5"
+
+# Create a ModelCheckpoint callback that saves the model's weights only
+checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
+                                                         save_weights_only=True,  # set to False to save the entire model
+                                                         save_best_only=True,  # save only the best model weights instead of a model every epoch
+                                                         save_freq="epoch",  # save every epoch
+                                                         verbose=1)
+base_eff_modelOne = create_b0_base()
+initial_epochs = 5
+# compile and fit
+base_eff_modelOne.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(), optimizer=tf.keras.optimizers.Adam(),
+                          metrics=["accuracy"])
+base_eff_modelOne_history = base_eff_modelOne.fit(
+    train_data_aug_20, epochs=initial_epochs,
+    validation_data=valid_data,
+    callbacks=[checkpoint_callback]
+)
+
+
+
+plot_history(base_eff_modelOne_history)
+results_aug_25 = base_eff_modelOne.evaluate(test_data)
+print(results_aug_25)
+# Load the weights from the pre-trained model
+base_eff_modelOne.load_weights(checkpoint_path)
+base_loaded_weights = base_eff_modelOne.evaluate(test_data)
+print(base_loaded_weights)
+
+# create a new instance of the base model with lower learning rate
+base_eff_modelTwo = create_b0_base(lr = 0.0001)
+# Load the weights from the previous model chekpoint
+base_eff_modelTwo.load_weights(checkpoint_path)
+
+# Evaluate the test results to make sure they are same
+base_eff_modelTwo.evaluate(test_data)
+
+base_eff_modelTwo.summary()
+print("Total trainable parameters in the model ", len(base_eff_modelTwo.trainable_variables))
+
+for _,layer in enumerate(base_eff_modelTwo.layers):
+    print("Layer no : ",_,"Trainable : ",layer.trainable, "Layer Name : ", layer.name,)
+
+base_eff_modelTwo_base = base_eff_modelTwo.layers[1]
