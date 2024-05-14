@@ -218,3 +218,35 @@ for _,layer in enumerate(base_eff_modelTwo.layers):
     print("Layer no : ",_,"Trainable : ",layer.trainable, "Layer Name : ", layer.name,)
 
 base_eff_modelTwo_base = base_eff_modelTwo.layers[1]
+
+
+#==============================================================
+from PIL import Image
+from io import BytesIO
+import requests
+
+
+def plot_and_predict(url, img_shape=224):
+    #     Download and preprocess
+    response = requests.get(url)
+    image_data = BytesIO(response.content)
+    image = Image.open(image_data)
+    image = image.convert("RGB")
+    image = image.resize((img_shape, img_shape))
+    image_array = np.array(image)
+
+    #     Make predictions
+    img = np.expand_dims(image_array, axis=0)
+    prediction = base_eff_modelOne.predict(img, verbose=0)
+    predicted_label = np.argmax(prediction)
+
+    print(f"Smoking with probability {prediction[0][1] * 100}")
+    print(f"Non-Smoking with probability {prediction[0][0] * 100}")
+
+    plt.imshow(image_array)
+    plt.axis('off')
+    plt.show
+
+plot_and_predict('https://img.freepik.com/free-photo/young-man-smoking_144627-29295.jpg')
+plot_and_predict('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZ2FnaBLHoNCw4OM00db5ahJdvs_LXEo45OQ&usqp=CAU')
+
