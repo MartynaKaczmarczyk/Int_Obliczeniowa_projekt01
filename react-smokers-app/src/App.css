@@ -1,0 +1,56 @@
+body {
+  background: #5e63b6; 
+  margin: 0;
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  color: #27296d;
+}
+
+.App {
+  background: #a393eb;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+h1, form {
+  background: #f5c7f7; 
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+
+.custom-file-upload, button {
+  border: 1px solid #ccc;
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+  background-color: #f0f0f0;
+  color: #333;
+  border-radius: 4px;
+}
+
+.custom-file-upload:hover, button:hover {
+  background-color: #e0e0e0;
+}
+
+input[type="file"]::-webkit-file-upload-button,
+input[type="file"]::-ms-browse {
+  opacity: 0;
+  font-size: 0;
+}
+input[type="file"]::-moz-browse {
+  opacity: 0;
+  font-size: 0;
+  visibility: hidden;
+}
+
+input[type="file"] {
+  opacity: 0;
+  font-size: 0;
+  visibility: hidden;
+}
+
