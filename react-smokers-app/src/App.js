@@ -85,11 +85,11 @@ function App() {
             )}
             {prediction && <h2>Prediction: {prediction}</h2>}
             <div>
-      <div>
+      {/* <div>
       <h1>Generator</h1>
       <button onClick={handleButtonClick}>Get Image</button>
       {imageSrc && <img src={imageSrc} alt="Image" />}
-      </div>
+      </div> */}
     </div>
         </div>
     );
